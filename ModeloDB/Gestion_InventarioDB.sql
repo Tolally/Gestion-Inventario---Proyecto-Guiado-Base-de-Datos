@@ -25,7 +25,7 @@ CREATE TABLE "Categoria" (
 );
 
 CREATE TABLE "Productos" (
-  "FK_ID_Productos" integer PRIMARY KEY,
+  "PK_ID_Productos" integer PRIMARY KEY,
   "Nombre" varchar,
   "Descripcion" varchar,
   "FK_ID_Categoria" integer NOT NULL,
@@ -62,7 +62,7 @@ ALTER TABLE "Compras" ALTER COLUMN "PK_ID_Compras" ADD GENERATED ALWAYS AS IDENT
 
 ALTER TABLE "Categoria" ALTER COLUMN "PK_ID_Categoria" ADD GENERATED ALWAYS AS IDENTITY;
 
-ALTER TABLE "Productos" ALTER COLUMN "FK_ID_Productos" ADD GENERATED ALWAYS AS IDENTITY;
+ALTER TABLE "Productos" ALTER COLUMN "PK_ID_Productos" ADD GENERATED ALWAYS AS IDENTITY;
 
 ALTER TABLE "Ventas" ALTER COLUMN "PK_ID_Ventas" ADD GENERATED ALWAYS AS IDENTITY;
 
@@ -72,7 +72,7 @@ ALTER TABLE "Compras" ADD FOREIGN KEY ("FK_ID_Proveedor") REFERENCES "Proveedore
 
 ALTER TABLE "Productos_Comprados" ADD FOREIGN KEY ("FK_ID_Compras") REFERENCES "Compras" ("PK_ID_Compras");
 
-ALTER TABLE "Productos_Comprados" ADD FOREIGN KEY ("FK_ID_Catalogo") REFERENCES "Productos" ("FK_ID_Productos");
+ALTER TABLE "Productos_Comprados" ADD FOREIGN KEY ("FK_ID_Catalogo") REFERENCES "Productos" ("PK_ID_Productos");
 
 ALTER TABLE "Productos" ADD FOREIGN KEY ("FK_ID_Categoria") REFERENCES "Categoria" ("PK_ID_Categoria");
 
@@ -80,5 +80,5 @@ ALTER TABLE "Ventas" ADD FOREIGN KEY ("FK_ID_Trabajador") REFERENCES "Trabajador
 
 ALTER TABLE "Productos_Vendidos" ADD FOREIGN KEY ("FK_ID_Ventas") REFERENCES "Ventas" ("PK_ID_Ventas");
 
-ALTER TABLE "Productos_Vendidos" ADD FOREIGN KEY ("FK_ID_Productos") REFERENCES "Productos" ("FK_ID_Productos");
+ALTER TABLE "Productos_Vendidos" ADD FOREIGN KEY ("FK_ID_Productos") REFERENCES "Productos" ("PK_ID_Productos");
 

@@ -34,22 +34,24 @@ def generar_productos(cantidad, categorias):
         for i in range(1, cantidad + 1)
     ]
 
-def generar_compras(cantidad, proveedores):
+def generar_productos_comprados(cantidad, compras, productos):
     return [
         (
-            random.choice(proveedores),
-            datetime.now() - timedelta(days=random.randint(0, 365)),
-            random.randint(1000, 10000)
+            random.choice(compras),
+            random.choice(productos),
+            random.randint(1, 10),  # Cantidad
+            random.randint(10, 100)  # Precio por unidad
         )
         for _ in range(cantidad)
     ]
 
-def generar_ventas(cantidad, trabajadores):
+def generar_productos_vendidos(cantidad, ventas, productos):
     return [
         (
-            random.choice(trabajadores),
-            random.randint(100, 10000),
-            datetime.now() - timedelta(days=random.randint(0, 365))
+            random.choice(ventas),
+            random.choice(productos),
+            random.randint(1, 10),  # Cantidad
+            random.randint(10, 100)  # Precio por unidad
         )
         for _ in range(cantidad)
     ]
@@ -97,6 +99,20 @@ def insertar_ventas(datos):
     )
     conn.commit()
 
+def insertar_productos_comprados(datos):
+    cursor.executemany(
+        'INSERT INTO "Productos_Comprados" ("FK_ID_Compras", "FK_ID_Catalogo", "Cantidad", "Precio_Unidad") VALUES (%s, %s, %s, %s)',
+        datos
+    )
+    conn.commit()
+
+def insertar_productos_vendidos(datos):
+    cursor.executemany(
+        'INSERT INTO "Productos_Vendidos" ("FK_ID_Ventas", "FK_ID_Productos", "Cantidad", "Precio_Unidad") VALUES (%s, %s, %s, %s)',
+        datos
+    )
+    conn.commit()
+
 
 if __name__ == "__main__":
 
@@ -137,17 +153,70 @@ if __name__ == "__main__":
         proveedores_ids = [row[0] for row in cursor.fetchall()]
 
         # Insertar Compras
-        compras = generar_compras(15, proveedores_ids)
-        insertar_compras(compras)
+        compras = []
+        for _ in range(15):
 
-        # Obtener IDs de trabajadores para asignar a ventas
-        cursor.execute('SELECT "PK_ID_Trabajador" FROM "Trabajadores"')
-        trabajadores_ids = [row[0] for row in cursor.fetchall()]
+            proveedor_id = random.choice(proveedores_ids)
+            fecha = datetime.now() - timedelta(days=random.randint(0, 365))
+            cursor.execute('SELECT "PK_ID_Productos", "Precio_Unidad" FROM "Productos"')
+            productos_disponibles = cursor.fetchall()
+            productos_comprados = []
+            monto_total = 0
+
+            for _ in range(random.randint(1, 5)):  # Productos por compra
+                producto_id, precio_unidad = random.choice(productos_disponibles)
+                cantidad = random.randint(1, 10)
+                productos_comprados.append((producto_id, cantidad, precio_unidad))
+                monto_total += cantidad * precio_unidad
+
+            cursor.execute(
+                'INSERT INTO "Compras" ("FK_ID_Proveedor", "Fecha", "Monto_Total") VALUES (%s, %s, %s) RETURNING "PK_ID_Compras"',
+                (proveedor_id, fecha, monto_total)
+            )
+
+            compra_id = cursor.fetchone()[0]
+            compras.append(compra_id)
+
+            for producto_id, cantidad, precio_unidad in productos_comprados:
+                cursor.execute(
+                    'INSERT INTO "Productos_Comprados" ("FK_ID_Compras", "FK_ID_Catalogo", "Cantidad", "Precio_Unidad") VALUES (%s, %s, %s, %s)',
+                    (compra_id, producto_id, cantidad, precio_unidad)
+                )
 
         # Insertar Ventas
-        ventas = generar_ventas(20, trabajadores_ids)
-        insertar_ventas(ventas)
+        cursor.execute('SELECT "PK_ID_Trabajador" FROM "Trabajadores"')
+        trabajadores_ids = [row[0] for row in cursor.fetchall()]
+        ventas = []
 
+        for _ in range(20):
+            trabajador_id = random.choice(trabajadores_ids)
+            fecha = datetime.now() - timedelta(days=random.randint(0, 365))
+            cursor.execute('SELECT "PK_ID_Productos", "Precio_Unidad" FROM "Productos"')
+            productos_disponibles = cursor.fetchall()
+            productos_vendidos = []
+            monto_total = 0
+
+            for _ in range(random.randint(1, 5)):  # Productos por venta
+                producto_id, precio_unidad = random.choice(productos_disponibles)
+                cantidad = random.randint(1, 10)
+                productos_vendidos.append((producto_id, cantidad, precio_unidad))
+                monto_total += cantidad * precio_unidad
+
+            cursor.execute(
+                'INSERT INTO "Ventas" ("FK_ID_Trabajador", "Monto_Total", "Fecha") VALUES (%s, %s, %s) RETURNING "PK_ID_Ventas"',
+                (trabajador_id, monto_total, fecha)
+            )
+
+            venta_id = cursor.fetchone()[0]
+            ventas.append(venta_id)
+
+            for producto_id, cantidad, precio_unidad in productos_vendidos:
+                cursor.execute(
+                    'INSERT INTO "Productos_Vendidos" ("FK_ID_Ventas", "FK_ID_Productos", "Cantidad", "Precio_Unidad") VALUES (%s, %s, %s, %s)',
+                    (venta_id, producto_id, cantidad, precio_unidad)
+                )
+
+        conn.commit()
         print("La base de datos ha sido llenada con datos aleatorios.")
     except Exception as e:
         print(f"Error, no se pudo llenar la base de datos\nDetalle: {e}")
