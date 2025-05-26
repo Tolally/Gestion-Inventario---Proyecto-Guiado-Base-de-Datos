@@ -87,7 +87,7 @@ def insertar_productos(datos):
 
 def insertar_compras(datos):
     cursor.executemany(
-        'INSERT INTO "Compras" ("FK_ID_Proveedor", "Fecha", "Monto_Total") VALUES (%s, %s, %s)',
+        'INSERT INTO "Compras" ("FK_ID_Proveedor", "FK_ID_Trabajador", "Fecha", "Monto_Total") VALUES (%s, %s, %s, %s)',
         datos
     )
     conn.commit()
@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 monto_total += cantidad * precio_unidad
 
             cursor.execute(
-                'INSERT INTO "Compras" ("FK_ID_Proveedor", "FK_ID_Trabajador", "Fecha", "Monto_Total") VALUES (%s, %s, %s) RETURNING "PK_ID_Compras"',
+                'INSERT INTO "Compras" ("FK_ID_Proveedor", "FK_ID_Trabajador", "Fecha", "Monto_Total") VALUES (%s, %s, %s, %s) RETURNING "PK_ID_Compras"',
                 (proveedor_id, trabajador_id, fecha, monto_total)
             )
 
