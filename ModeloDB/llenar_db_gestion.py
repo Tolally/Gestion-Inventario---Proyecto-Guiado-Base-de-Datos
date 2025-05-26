@@ -152,11 +152,16 @@ if __name__ == "__main__":
         cursor.execute('SELECT "PK_ID_Proveedor" FROM "Proveedores"')
         proveedores_ids = [row[0] for row in cursor.fetchall()]
 
+        # Obtener IDs de trabajadores para asignar a compras
+        cursor.execute('SELECT "PK_ID_Trabajador" FROM "Trabajadores"')
+        trabajadores_ids = [row[0] for row in cursor.fetchall()]
+
         # Insertar Compras
         compras = []
         for _ in range(15):
 
             proveedor_id = random.choice(proveedores_ids)
+            trabajador_id = random.choice(trabajadores_ids)
             fecha = datetime.now() - timedelta(days=random.randint(0, 365))
             cursor.execute('SELECT "PK_ID_Productos", "Precio_Unidad" FROM "Productos"')
             productos_disponibles = cursor.fetchall()
@@ -170,8 +175,8 @@ if __name__ == "__main__":
                 monto_total += cantidad * precio_unidad
 
             cursor.execute(
-                'INSERT INTO "Compras" ("FK_ID_Proveedor", "Fecha", "Monto_Total") VALUES (%s, %s, %s) RETURNING "PK_ID_Compras"',
-                (proveedor_id, fecha, monto_total)
+                'INSERT INTO "Compras" ("FK_ID_Proveedor", "FK_ID_Trabajador", "Fecha", "Monto_Total") VALUES (%s, %s, %s) RETURNING "PK_ID_Compras"',
+                (proveedor_id, trabajador_id, fecha, monto_total)
             )
 
             compra_id = cursor.fetchone()[0]

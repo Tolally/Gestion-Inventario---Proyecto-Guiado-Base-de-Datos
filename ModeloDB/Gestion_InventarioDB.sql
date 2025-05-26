@@ -8,6 +8,7 @@ CREATE TABLE "Proveedores" (
 CREATE TABLE "Compras" (
   "PK_ID_Compras" integer PRIMARY KEY,
   "FK_ID_Proveedor" integer NOT NULL,
+  "FK_ID_Trabajador" integer NOT NULL,
   "Fecha" timestamp,
   "Monto_Total" integer
 );
@@ -69,6 +70,8 @@ ALTER TABLE "Ventas" ALTER COLUMN "PK_ID_Ventas" ADD GENERATED ALWAYS AS IDENTIT
 ALTER TABLE "Trabajadores" ALTER COLUMN "PK_ID_Trabajador" ADD GENERATED ALWAYS AS IDENTITY;
 
 ALTER TABLE "Compras" ADD FOREIGN KEY ("FK_ID_Proveedor") REFERENCES "Proveedores" ("PK_ID_Proveedor");
+
+ALTER TABLE "Compras" ADD FOREIGN KEY ("FK_ID_Trabajador") REFERENCES "Trabajadores" ("PK_ID_Trabajador");
 
 ALTER TABLE "Productos_Comprados" ADD FOREIGN KEY ("FK_ID_Compras") REFERENCES "Compras" ("PK_ID_Compras");
 
